@@ -14,9 +14,13 @@ app.use(session({
 }));
 // Require API routes
 const users = require('./routes/users')
+const index = require('./routes/index')
+const stream = require('./routes/stream')
 
 // Import API Routes
+app.use('/', index)
 app.use('/users', users)
+app.use('/stream', stream)
 
 // Export the server middleware
 module.exports = {

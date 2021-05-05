@@ -98,19 +98,131 @@ export default {
       items: [
         {
           icon: 'mdi-apps',
-          title: 'Welcome',
+          title: '首頁',
           to: '/'
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
-        }
+          icon: 'mdi-clipboard-account',
+          title: '註冊',
+          to: '/users/sign_up'
+        },
+        {
+          icon: 'mdi-login',
+          title: '登入',
+          to: '/users/log_in'
+        },
+        {
+          icon: 'mdi-logout',
+          title: '登出',
+          to: '/users/log_out'
+        },
+        {
+          icon: 'mdi-view-dashboard',
+          title: '儀錶板',
+          to: '/dashboard'
+        },
       ],
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Live Broadcast'
+      title: 'Live Broadcast',
+      tempItems: [
+        {
+          icon: 'mdi-apps',
+          title: '首頁',
+          to: '/'
+        },
+        {
+          icon: 'mdi-clipboard-account',
+          title: '註冊',
+          to: '/users/sign_up'
+        },
+        {
+          icon: 'mdi-login',
+          title: '登入',
+          to: '/users/log_in'
+        },
+        {
+          icon: 'mdi-logout',
+          title: '登出',
+          to: '/users/log_out'
+        },
+        {
+          icon: 'mdi-view-dashboard',
+          title: '儀錶板',
+          to: '/dashboard'
+        },
+      ]
+    }
+  },
+  async mounted(){
+      let vm = this;
+      var response = await vm.$axios.post('/users/is_user');
+      if (parseInt(response.data.user_id) > 0) { //登入
+        vm.loginMenu()
+      }
+      else{
+        vm.logoutMenu()
+      }
+  },
+  created() {
+    let vm = this;
+    vm.$bus.$on('log_out', (data) => {
+      vm.logoutMenu();
+    })
+    vm.$bus.$on('log_in', (data) => {
+      vm.loginMenu();
+    })
+  },
+  methods: {
+    loginMenu(){
+        let vm = this;
+        //保留登出，刪除註冊、登入
+        for (let i = 0; i < vm.items.length; i++) {
+          if (vm.items[i].title == '註冊' || vm.items[i].title == '登入'){
+            vm.items.splice(i--, 1);
+          }
+        }
+        let bool_logout = false;
+        //如果登出還存在，也就是使用者重整頁面了
+        for (let i = 0; i < vm.items.length; i++){
+          if (vm.items[i].title === '登出'){
+              bool_logout = true; // 標記存在
+          }
+        }
+        //如果登出不存在
+        if (!bool_logout){
+          vm.items.push(
+            vm.tempItems[3]
+          )
+        }
+
+    },
+    logoutMenu(){
+        let vm = this;
+        //保留登入、註冊，刪除登出
+        for (let i = 0; i < vm.items.length; i++) {
+          if (vm.items[i].title == '登出'){
+            vm.items.splice(i--, 1);
+          }
+        }
+
+        let bool_login = false;
+        //如果登入還存在，也就是使用者重整頁面了
+        for (let i = 0; i < vm.items.length; i++){
+          if (vm.items[i].title === '登入'){
+              bool_login = true; // 標記存在
+          }
+        }
+        //如果登出不存在
+        if (!bool_login){
+          vm.items.push(
+            vm.tempItems[1]
+          )
+          vm.items.push(
+            vm.tempItems[2]
+          )
+        }
     }
   }
 }

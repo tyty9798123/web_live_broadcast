@@ -65,9 +65,6 @@ export default {
     methods: {
         async sign_up() {
             let vm = this;
-            console.log(
-                vm.email, vm.password, vm.confirmPassword
-            )
             if (vm.passwordCorrect) {
                 var response = await vm.$axios.post('/users/sign_up', {
                     email: vm.email,

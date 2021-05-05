@@ -65,6 +65,7 @@ export default {
                 password: vm.password
             })
             if (response.data.success){
+                vm.$bus.$emit('log_in')
                 vm.$router.push({ path:'/' })
             }
             else {

@@ -58,4 +58,9 @@ router.post('/is_user', function(req, res, next) {
     return res.send({user_id: -1})
 })
 
+router.post('/log_out', function(req, res, next) {
+    req.session.destroy(function(err) {
+        return sendSuccessStatus(res, true)
+    })
+})
 module.exports = router
