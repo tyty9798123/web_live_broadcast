@@ -50,4 +50,79 @@ router.get('/get_code_by_email', function(req, res, next) {
         })
     }
 })
+
+router.post('/create_audience_code', (req, res, next) => {
+    if (req.session.uid){
+        
+        let addAudienceCode = `
+            insert into audience_code (code, counter, user_id)
+            values ('${req.body.code}', ${req.body.counter}, ${req.session.uid});
+        `
+        mysql.query(addAudienceCode, function (err, results) {
+            if (err){
+                res.send({
+                    success: false
+                })
+            }
+            else{
+                return res.send({
+                    success: true,
+                })
+            }
+        })
+    }
+})
+
+router.post('/check_audience_code', (req, res, next) => {
+    let streamerEmail = req.body.streamerEmail;
+    let code = req.body.code;
+    
+    let stmt = `
+        SELECT b.id as audience_code_id, b.counter as counter FROM users as a, audience_code as b
+        WHERE a.email = '${streamerEmail}' AND
+        b.code = '${code}' AND
+        a.id = b.user_id;
+    `
+    mysql.query(stmt, (err, result) => {
+        if (err){
+            res.send({success: false, msg: '資料庫發生錯誤'})
+        }
+        else{
+            if (!result[0])
+            {
+                return res.send({ success: false, msg: '使用者不存在' })
+            }
+            let counter = result[0].counter || -1;
+            let audience_code_id = result[0].audience_code_id;
+            if (counter === 1){
+                // delete the rows and success
+                let deleteRow = `DELETE FROM audience_code where id = ${audience_code_id};`
+                mysql.query(deleteRow, (err, result) => {
+                    if (err){
+                        return res.send({success: false, msg: '資料庫發生錯誤'})
+                    }
+                })
+                return res.send({success: true})
+            }
+            let updateCounter = `
+                UPDATE audience_code SET counter = counter -1 WHERE id = ${audience_code_id};
+            `
+            mysql.query(updateCounter, (err, results)=> { 
+                if (err){
+                    res.send({success: false, msg: '資料庫發生錯誤'})
+                }
+                else{
+                    if ( Number(counter) > 0 ){
+                        res.send({
+                            success: true
+                        })
+                    }
+                    else{
+                        res.send({success: false, msg: '金鑰使用次數已經完畢'})
+                    }
+                }
+            })
+        }
+    })
+})
 module.exports = router
